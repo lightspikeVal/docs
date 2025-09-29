@@ -35,7 +35,7 @@
       "anchors": [
         {
           "anchor": "Documentation",
-          "href": "/",
+          "href": "https://purrscale-b6f52138.mintlify.app/",
           "icon": "book-open-cover"
         }
       ]
@@ -49,13 +49,13 @@
     "links": [
       {
         "label": "Dashboard",
-        "href": "https://purrscale.vercel.app/workspace/"
+        "href": "https://purrscale-b6f52138.mintlify.app/workspace/"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "/"
+      "href": "https://purrscale-b6f52138.mintlify.app/"
     }
   },
   "contextual": {
