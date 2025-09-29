@@ -1,97 +1,213 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Getting Started"
+description: "Welcome to Purrscale - Your unified cloud platform for blob storage, key-value stores, and global database"
+icon: "wave"
 ---
 
-## Setting up
+# Purrscale - Getting Started Guide
 
-Get your documentation site up and running in minutes.
+## What is Purrscale?
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Purrscale is a unified cloud platform that combines three essential backend services into one seamless solution:
 
-## Make it yours
+- **Blob Storage** - Upload, store, and retrieve large binary files with automatic versioning and metadata support
+- **Key-Value Stores** - Fast, low-latency storage for small data items with atomic operations
+- **Global Database** - Enterprise-grade database with geographically distributed servers for worldwide low-latency access
 
-Design a docs site that looks great and empowers your users.
+## Why Purrscale?
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+### 🚀 **All-in-One Solution**
+Stop juggling multiple services. Purrscale provides blob storage, key-value stores, and database functionality in a single, unified platform.
 
-## Create beautiful pages
+### ⚡ **Lightning Fast**
+Experience sub-millisecond response times with our globally distributed infrastructure and optimized data access patterns.
 
-Everything you need to create world-class documentation.
+### 🔒 **Enterprise-Grade Security**
+Built with security first, featuring Firebase Authentication, encrypted data transmission, and secure storage protocols.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+### 🌍 **Global Access**
+Your data is replicated across multiple geographic regions, ensuring low-latency access for users anywhere in the world.
 
-## Need inspiration?
+### 📊 **Developer Friendly**
+Simple REST APIs, comprehensive documentation, and intuitive dashboard make integration and management effortless.
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+## How to Sign Up
+
+### Step 1: Create Your Account
+
+1. Navigate to [https://purrscale.com](https://purrscale.com)
+2. Click the **"Build now"** button on the homepage
+3. You'll be redirected to the login page
+
+### Step 2: Authentication
+
+Purrscale uses Firebase Authentication for secure access:
+
+- **New Users**: Click the sign-up option and provide your email address
+- **Existing Users**: Enter your credentials to log in
+- **Anonymous Access**: The system automatically handles anonymous sign-in for quick testing
+
+### Step 3: Dashboard Access
+
+After successful authentication, you'll be redirected to your personal dashboard where you can manage workspaces and access all Purrscale features.
+
+## How to Create a Workspace
+
+### What is a Workspace?
+
+A workspace is a dedicated environment where you can organize your projects, manage resources, and collaborate with team members. Each workspace has its own isolated storage and database instances.
+
+### Creating Your First Workspace
+
+1. **From the Dashboard**: 
+   - Click on **"Workspaces"** in the navigation menu
+   - Select **"Create New Workspace"**
+
+2. **Fill in Workspace Details**:
+   - **Workspace Name**: Choose a unique name for your workspace (e.g., "my-first-project")
+   - **Description**: Optional description of your workspace purpose
+   - **Region**: Select the geographic region closest to your users for optimal performance
+
+3. **Configure Initial Settings**:
+   - **Storage Tier**: Choose between Free, Pro, or Enterprise tiers
+   - **Team Members**: Add collaborators if needed (skip for personal projects)
+   - **Resource Limits**: Set initial quotas for storage and API calls
+
+4. **Create Workspace**:
+   - Review your settings
+   - Click **"Create Workspace"**
+   - Wait for the workspace to be provisioned (usually takes 10-30 seconds)
+
+### Accessing Your Workspace
+
+Once created, you can access your workspace via:
+- URL: `https://purrscale.com/workspace/your-workspace-name`
+- Dashboard navigation menu
+
+## How to Create a KV Bucket
+
+### What is a KV Bucket?
+
+A Key-Value (KV) bucket is a container for storing small data items as key-value pairs. It's perfect for configuration data, user preferences, session data, or any structured information that needs fast retrieval.
+
+### Creating a KV Bucket
+
+#### Method 1: Using the Dashboard
+
+1. **Navigate to Your Workspace**:
+   - Go to `https://purrscale.com/workspace/your-workspace-name`
+   - Click on the **"KV"** tab in the dashboard
+
+2. **Create New Bucket**:
+   - Click the **"Create New Bucket"** button
+   - Fill in the bucket details:
+     - **Bucket Name**: Choose a descriptive name (e.g., "user-preferences")
+     - **Description**: Optional description of the bucket's purpose
+     - **Access Level**: Public or Private (default: Private)
+
+3. **Configure Bucket Settings**:
+   - **TTL (Time To Live)**: Set expiration time for entries (optional)
+   - **Max Entries**: Limit the number of key-value pairs (optional)
+   - **Retention Policy**: Choose how long to keep deleted data
+
+4. **Create Bucket**:
+   - Review your configuration
+   - Click **"Create Bucket"**
+   - Your bucket is now ready to use!
+
+#### Method 2: Using the API
+
+```bash
+# Set up your authentication token
+export PURRSCALE_TOKEN="your-firebase-auth-token"
+
+# Create a new KV bucket
+curl -X POST https://kvpawcloud.onrender.com/pawk2/new/kv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-first-bucket",
+    "description": "Storing user preferences",
+    "access": "private"
+  }'
+```
+
+### Adding Data to Your KV Bucket
+
+#### Using the Dashboard:
+
+1. **Select Your Bucket**: Click on the bucket you just created
+2. **Add New Entry**: Click **"Add Entry"**
+3. **Enter Key-Value Pair**:
+   - **Key**: Enter a unique identifier (e.g., "theme-setting")
+   - **Value**: Enter the data (can be text, JSON, or any string)
+4. **Save**: Click **"Save Entry"**
+
+#### Using the API:
+
+```bash
+# Add a key-value entry
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "theme-setting",
+    "value": "dark-mode",
+    "metadata": {
+      "created_by": "user-123",
+      "type": "preference"
+    }
+  }'
+```
+
+### Retrieving Data from Your KV Bucket
+
+#### Using the Dashboard:
+
+1. **Select Your Bucket**: Click on your bucket
+2. **View Entries**: All key-value pairs are displayed in a table
+3. **Search**: Use the search bar to find specific entries
+4. **Edit/Delete**: Use the action buttons to modify entries
+
+#### Using the API:
+
+```bash
+# Get a specific key-value entry
+curl -X GET https://kvpawcloud.onrender.com/pawk2/storagekv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bucket": "my-first-bucket",
+    "key": "theme-setting"
+  }'
+
+# List all entries in a bucket
+curl -X GET https://kvpawcloud.onrender.com/pawk2/listkv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN"
+```
+
+## What's Next?
+
+Congratulations! You've successfully:
+- ✅ Created your Purrscale account
+- ✅ Set up your first workspace
+- ✅ Created your first KV bucket
+- ✅ Added and retrieved key-value data
+
+### Next Steps:
+
+1. **Explore Blob Storage**: Try uploading files to your workspace
+2. **Set Up Database**: Create database collections for structured data
+3. **Configure Team Access**: Add team members to your workspace
+4. **Monitor Usage**: Check your dashboard for usage statistics and quotas
+5. **Integrate with Your App**: Use our REST APIs to connect Purrscale to your applications
+
+### Need Help?
+
+- **Documentation**: Visit our docs at [docs.purrscale.com](https://docs.purrscale.com)
+- **Support**: Contact our support team at support@purrscale.com
+- **Community**: Join our developer community at community.purrscale.com
+
+---
+
+**Happy building with Purrscale!** 🚀

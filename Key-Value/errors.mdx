@@ -1,0 +1,336 @@
+---
+title: 'Key-Value Store Errors'
+description: 'Common KV store errors, their causes, and how to resolve them'
+icon: 'exclamation-triangle'
+---
+
+# Key-Value Store Errors
+
+When working with Purrscale's key-value stores, you may encounter various HTTP status codes and error responses. This guide covers the most common errors, their causes, and how to resolve them.
+
+## Common KV Store Errors
+
+| Status Code | Error Name | Common Causes | Solutions |
+|-------------|------------|---------------|-----------|
+| **400** | Bad Request | Missing KV ID or UID in request parameters | Ensure all required parameters are included in your request body. Check that `bucket` and `key` parameters are present for storage operations. |
+| **401** | Unauthorized | Missing or invalid Bearer token for authenticated reads | Include a valid `Authorization: Bearer <token>` header in your request. Ensure your token hasn't expired and has the necessary permissions. |
+| **429** | Too Many Requests | Resource limits exceeded based on your plan | Check your usage dashboard. Implement rate limiting in your application. Consider upgrading your plan if you consistently hit limits. |
+| **500** | Internal Server Error | Server-side issues; possibly under maintenance or idle | Retry the request after a few seconds. Check Purrscale status page for maintenance notifications. Contact support if the issue persists. |
+
+## Detailed Error Breakdown
+
+### 400 Bad Request
+
+**Common Scenarios:**
+- Missing required parameters in request body
+- Invalid JSON format
+- Malformed bucket or key names
+- Missing KV ID or UID for specific operations
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "error": "Missing required parameter: bucket",
+  "code": 400,
+  "details": "The 'bucket' parameter is required for this operation"
+}
+```
+
+**How to Fix:**
+1. Check your request body for all required parameters
+2. Validate JSON syntax using a JSON linter
+3. Ensure bucket and key names follow naming conventions
+4. Include KV ID/UID when required by the endpoint
+
+### 401 Unauthorized
+
+**Common Scenarios:**
+- Missing Authorization header
+- Invalid or expired Bearer token
+- Token lacks necessary permissions for the operation
+- Attempting to access private resources without authentication
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "error": "Invalid authentication token",
+  "code": 401,
+  "details": "The provided token is invalid or has expired"
+}
+```
+
+**How to Fix:**
+1. Add `Authorization: Bearer <your-token>` header to your request
+2. Refresh your authentication token from the dashboard
+3. Ensure your token has the required permissions
+4. Check that you're using the correct token for the environment
+
+### 429 Too Many Requests
+
+**Common Scenarios:**
+- Exceeded API rate limits for your plan
+- Too many concurrent requests
+- Exceeded storage or data transfer quotas
+- Burst traffic patterns triggering rate limiting
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded",
+  "code": 429,
+  "details": "API rate limit of 1000 requests per minute exceeded",
+  "retry_after": 60
+}
+```
+
+**How to Fix:**
+1. Implement exponential backoff in your application
+2. Check your current usage in the dashboard
+3. Optimize your API calls to reduce frequency
+4. Consider upgrading your plan for higher limits
+5. Use caching to reduce redundant requests
+
+### 500 Internal Server Error
+
+**Common Scenarios:**
+- Server under maintenance
+- Temporary service unavailability
+- Database connection issues
+- Internal service errors or bugs
+- Idle timeout for inactive connections
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "error": "Internal server error",
+  "code": 500,
+  "details": "An unexpected error occurred while processing your request"
+}
+```
+
+**How to Fix:**
+1. Wait a few seconds and retry the request
+2. Check the Purrscale status page for maintenance notices
+3. Implement retry logic with exponential backoff
+4. Contact support if the issue persists
+5. Monitor your application for error patterns
+
+## Other Common Errors
+
+### 403 Forbidden
+
+**Causes:**
+- Insufficient permissions for the requested operation
+- Attempting to access someone else's private data
+- Account suspended or restricted
+
+**Solution:**
+- Check your account permissions
+- Ensure you're accessing your own data
+- Contact support if your account is restricted
+
+### 404 Not Found
+
+**Causes:**
+- Bucket does not exist
+- Key not found in the specified bucket
+- Invalid endpoint URL
+
+**Solution:**
+- Verify bucket name exists in your workspace
+- Check that the key exists before attempting to retrieve it
+- Confirm you're using the correct API endpoint
+
+### 409 Conflict
+
+**Causes:**
+- Attempting to create a bucket that already exists
+- Concurrent modification conflicts
+- Key already exists when trying to create with uniqueness constraint
+
+**Solution:**
+- Use a different bucket name
+- Implement optimistic concurrency control
+- Check if key exists before creating (use update instead)
+
+### 413 Payload Too Large
+
+**Causes:**
+- Request body exceeds size limits
+- Value data too large for KV storage
+- Exceeding maximum entry size for your plan
+
+**Solution:**
+- Reduce the size of your request payload
+- Consider using blob storage for large data
+- Check your plan's size limitations
+
+## Error Handling Best Practices
+
+### 1. Implement Retry Logic
+
+```javascript
+async function makeKVRequest(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || 5;
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        continue;
+      }
+      
+      if (response.status === 500) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        continue;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+    }
+  }
+}
+```
+
+### 2. Validate Requests Before Sending
+
+```javascript
+function validateKVRequest(bucket, key, value) {
+  if (!bucket || typeof bucket !== 'string') {
+    throw new Error('Bucket name is required and must be a string');
+  }
+  
+  if (!key || typeof key !== 'string') {
+    throw new Error('Key is required and must be a string');
+  }
+  
+  if (value && JSON.stringify(value).length > 1000000) {
+    throw new Error('Value size exceeds 1MB limit');
+  }
+}
+```
+
+### 3. Monitor and Log Errors
+
+```javascript
+function logKVError(error, context) {
+  console.error({
+    timestamp: new Date().toISOString(),
+    error: error.message,
+    code: error.code,
+    context: context,
+    stack: error.stack
+  });
+  
+  // Send to error tracking service
+  // trackError(error, context);
+}
+```
+
+### 4. Use Graceful Degradation
+
+```javascript
+async function getUserPreferences(userId) {
+  try {
+    const response = await fetchKVData(`user_${userId}_preferences`);
+    return response.data;
+  } catch (error) {
+    if (error.code === 429 || error.code === 500) {
+      // Return default preferences when KV is unavailable
+      return getDefaultPreferences();
+    }
+    throw error;
+  }
+}
+```
+
+## Debugging Tips
+
+### 1. Check Request Headers
+
+Ensure all required headers are present:
+```bash
+# Good request example
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/my-bucket \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{"key": "test", "value": "data"}'
+```
+
+### 2. Validate JSON Payload
+
+Use JSON validators to ensure your request body is properly formatted:
+```bash
+# Validate JSON
+echo '{"key": "test", "value": "data"}' | python -m json.tool
+```
+
+### 3. Monitor Usage Metrics
+
+Regularly check your dashboard for:
+- API request counts
+- Storage usage
+- Error rates
+- Rate limit status
+
+### 4. Test with Different Tools
+
+Try the same operation with different tools to isolate issues:
+- Use curl for direct API testing
+- Try the dashboard for manual operations
+- Use Postman for advanced testing
+
+## When to Contact Support
+
+Contact Purrscale support when:
+- 500 errors persist for more than 5 minutes
+- You consistently get 401 errors with valid tokens
+- You notice unusual error patterns
+- Your usage metrics don't match your expectations
+- You need help with plan-specific limits
+
+**Support Contact:**
+- Email: support@purrscale.com
+- Dashboard: In-app support chat
+- Status Page: status.purrscale.com
+
+By understanding these common errors and implementing proper error handling, you can build more robust applications with Purrscale's key-value stores.
+
+## Folders
+
+Simply put your MDX files in folders and update the paths in `docs.json`.
+
+For example, to have a page at `https://yoursite.com/your-folder/your-page` you would make a folder called `your-folder` containing an MDX file called `your-page.mdx`.
+
+<Warning>
+
+You cannot use `api` for the name of a folder unless you nest it inside another folder. Mintlify uses Next.js which reserves the top-level `api` folder for internal server calls. A folder name such as `api-reference` would be accepted.
+
+</Warning>
+
+```json Navigation With Folder
+"navigation": {
+  "tabs": [
+    {
+      "tab": "Docs",
+      "groups": [
+        {
+          "group": "Group Name",
+          "pages": ["your-folder/your-page"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Hidden pages
+
+MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.

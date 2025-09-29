@@ -1,0 +1,336 @@
+---
+title: 'Creating Key-Value Stores'
+description: 'Learn how to create KV buckets, add entries, and interact with them via API'
+icon: 'plus-circle'
+---
+
+# Creating Key-Value Stores
+
+This guide will walk you through creating your first key-value store in Purrscale, adding data to it, and interacting with it through the API.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+- ✅ A Purrscale account
+- ✅ A workspace created
+- ✅ Your authentication token ready
+
+## Creating a KV Bucket
+
+A Key-Value (KV) bucket is a container for storing small data items as key-value pairs. It's perfect for configuration data, user preferences, session data, or any structured information that needs fast retrieval.
+
+### Method 1: Using the Dashboard
+
+#### Step 1: Navigate to Your Workspace
+
+1. Go to `https://purrscale.com/workspace/your-workspace-name`
+2. Click on the **"KV"** tab in the dashboard
+
+#### Step 2: Create New Bucket
+
+1. Click the **"Create New Bucket"** button
+2. Fill in the bucket details:
+   - **Bucket Name**: Choose a descriptive name (e.g., "user-preferences")
+   - **Description**: Optional description of the bucket's purpose
+   - **Access Level**: Public or Private (default: Private)
+
+#### Step 3: Configure Bucket Settings
+
+1. **TTL (Time To Live)**: Set expiration time for entries (optional)
+2. **Max Entries**: Limit the number of key-value pairs (optional)
+3. **Retention Policy**: Choose how long to keep deleted data
+
+#### Step 4: Create Bucket
+
+1. Review your configuration
+2. Click **"Create Bucket"**
+3. Your bucket is now ready to use!
+
+### Method 2: Using the API
+
+```bash
+# Set up your authentication token
+export PURRSCALE_TOKEN="your-firebase-auth-token"
+
+# Create a new KV bucket
+curl -X POST https://kvpawcloud.onrender.com/pawk2/new/kv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-first-bucket",
+    "description": "Storing user preferences",
+    "access": "private"
+  }'
+```
+
+<Warning>
+
+Make sure to replace `your-firebase-auth-token` with your actual Firebase authentication token. You can find this in your Purrscale dashboard under account settings.
+
+</Warning>
+
+## Adding Your First Entry
+
+Now that you have a bucket, let's add your first key-value entry.
+
+### Method 1: Using the Dashboard
+
+#### Step 1: Select Your Bucket
+
+1. Navigate to your workspace's KV section
+2. Click on the bucket you just created
+
+#### Step 2: Add New Entry
+
+1. Click **"Add Entry"**
+2. Enter the key-value pair:
+   - **Key**: Enter a unique identifier (e.g., "theme-setting")
+   - **Value**: Enter the data (can be text, JSON, or any string)
+3. Click **"Save Entry"**
+
+#### Example Entry
+
+Let's create a user preference entry:
+
+- **Key**: `user_123_theme`
+- **Value**: `{
+  "theme": "dark",
+  "language": "en",
+  "notifications": true
+}`
+
+### Method 2: Using the API
+
+```bash
+# Add a key-value entry
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "theme-setting",
+    "value": "dark-mode",
+    "metadata": {
+      "created_by": "user-123",
+      "type": "preference"
+    }
+  }'
+```
+
+### Adding Multiple Entries
+
+You can add multiple entries to organize your data better:
+
+```bash
+# Add user session data
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "session_abc123",
+    "value": "active",
+    "metadata": {
+      "user_id": "user_123",
+      "expires_at": "2024-12-31T23:59:59Z"
+    }
+  }'
+
+# Add configuration data
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "config_max_users",
+    "value": "1000",
+    "metadata": {
+      "type": "system_config",
+      "last_updated": "2024-01-15T10:30:00Z"
+    }
+  }'
+```
+
+## Retrieving Data
+
+Once you have data in your bucket, you can retrieve it using either the dashboard or the API.
+
+### Method 1: Using the Dashboard
+
+1. **Select Your Bucket**: Click on your bucket in the KV section
+2. **View Entries**: All key-value pairs are displayed in a table
+3. **Search**: Use the search bar to find specific entries
+4. **Edit/Delete**: Use the action buttons to modify entries
+
+### Method 2: Using the API
+
+#### Get a Specific Entry
+
+```bash
+# Get a specific key-value entry
+curl -X GET https://kvpawcloud.onrender.com/pawk2/storagekv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bucket": "my-first-bucket",
+    "key": "theme-setting"
+  }'
+```
+
+#### List All Entries in a Bucket
+
+```bash
+# List all entries in a bucket
+curl -X GET https://kvpawcloud.onrender.com/pawk2/listkv \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN"
+```
+
+#### Example Response
+
+When you retrieve data, you'll get a response like this:
+
+```json
+{
+  "success": true,
+  "data": {
+    "key": "theme-setting",
+    "value": "dark-mode",
+    "metadata": {
+      "created_by": "user-123",
+      "type": "preference",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  }
+}
+```
+
+## Updating and Deleting Entries
+
+### Update an Entry
+
+```bash
+# Update an existing entry
+curl -X PUT https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "theme-setting",
+    "value": "light-mode",
+    "metadata": {
+      "created_by": "user-123",
+      "type": "preference",
+      "updated_at": "2024-01-15T11:00:00Z"
+    }
+  }'
+```
+
+### Delete an Entry
+
+```bash
+# Delete an entry
+curl -X DELETE https://kvpawcloud.onrender.com/pawk2/kv/my-first-bucket \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "theme-setting"
+  }'
+```
+
+## Best Practices
+
+### Key Naming Conventions
+
+- **Use descriptive names**: `user_123_preferences` instead of `data1`
+- **Be consistent**: Use the same naming pattern throughout your application
+- **Include identifiers**: Add user IDs, timestamps, or environment names
+- **Avoid special characters**: Stick to letters, numbers, underscores, and hyphens
+
+### Data Organization
+
+- **Group related data**: Use prefixes like `user_`, `config_`, `session_`
+- **Use metadata**: Store additional context about your entries
+- **Set TTL**: For temporary data like sessions, set expiration times
+- **Monitor usage**: Keep track of your bucket size and entry count
+
+### Security Considerations
+
+- **Use private buckets**: For sensitive data, keep buckets private
+- **Validate input**: Always validate data before storing it
+- **Use HTTPS**: Always use encrypted connections for API calls
+- **Rotate tokens**: Regularly update your authentication tokens
+
+## Common Use Cases
+
+### 1. User Preferences
+```bash
+# Store user theme preference
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/user-preferences \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "user_456_theme",
+    "value": "dark",
+    "metadata": {"type": "preference"}
+  }'
+```
+
+### 2. Session Management
+```bash
+# Store user session
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/sessions \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "sess_789",
+    "value": "user_456",
+    "metadata": {"expires": "1h"}
+  }'
+```
+
+### 3. Feature Flags
+```bash
+# Store feature flag
+curl -X POST https://kvpawcloud.onrender.com/pawk2/kv/feature-flags \
+  -H "Authorization: Bearer $PURRSCALE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "new_dashboard_enabled",
+    "value": "true",
+    "metadata": {"type": "feature_flag"}
+  }'
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Authentication Errors**: Check your token is valid and not expired
+2. **Bucket Not Found**: Ensure you're using the correct bucket name
+3. **Key Already Exists**: Use unique keys or update existing entries
+4. **Invalid Data Format**: Ensure your JSON is properly formatted
+
+### Error Responses
+
+```json
+{
+  "success": false,
+  "error": "Invalid authentication token",
+  "code": 401
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Bucket not found",
+  "code": 404
+}
+```
+
+## Next Steps
+
+Now that you know how to create and manage key-value stores, you can:
+
+1. **Explore Advanced Features**: Learn about TTL, batch operations, and more
+2. **Integrate with Your App**: Use the API in your application code
+3. **Monitor Usage**: Check your dashboard for usage statistics
+4. **Set Up Automation**: Create automated workflows for data management
+
+Congratulations! You've successfully created your first key-value store and learned how to interact with it programmatically. 🎉
